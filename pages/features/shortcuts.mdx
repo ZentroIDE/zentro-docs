@@ -1,0 +1,150 @@
+---
+title: Keyboard Shortcuts
+description: Complete keyboard shortcut reference for Zentro.
+---
+
+# Keyboard Shortcuts
+
+Every shortcut below is rebindable. Open the shortcuts panel with `Ctrl+K` then `Ctrl+B` (or search "Keyboard Shortcuts" in the [Command Palette](/features/command-palette)) to record a new key combo or reset any shortcut back to its default.
+
+## Editor
+
+| Action | Shortcut |
+|---|---|
+| New Query Tab | `Ctrl+T` |
+| Save Current Tab (as script) | `Ctrl+S` |
+| Close Current Tab | `Ctrl+W` |
+| Open Context Search | `Ctrl+E` |
+| Run Query | `Ctrl+Enter` |
+| Explain Query (while the SQL editor has focus) | `Ctrl+Shift+E` |
+| Explain Analyze | `Ctrl+Alt+E` |
+| Focus Editor | `Ctrl+I` |
+| Format Query | `Ctrl+Shift+F` |
+| Toggle Bookmark | `Ctrl+F3` |
+| Next Bookmark | `F3` |
+| Open Schema Diff | `Ctrl+Shift+D` |
+
+## Tabs
+
+| Action | Shortcut |
+|---|---|
+| Switch to the most recently used tab | `Ctrl+Tab` |
+| Step through recent tabs the other way | `Ctrl+Shift+Tab` |
+| Next Tab (left to right) | `Ctrl+PageDown` |
+| Previous Tab (right to left) | `Ctrl+PageUp` |
+| Go to Tab 1 … 9 | `Ctrl+1` … `Ctrl+9` |
+| Focus the Tab Strip | `Alt+Shift+T` |
+
+**`Ctrl+Tab` works like the switcher in your browser or VS Code.** Press it once and release to jump to the tab you used just before this one — press it again to come back. To go further back, keep `Ctrl` held and press `Tab` again: a list of your tabs appears, each press moves to the next most recently used one, and releasing `Ctrl` switches to the highlighted tab. `Ctrl+Shift+Tab` steps through the same list in the opposite direction. It needs at least two open tabs.
+
+Use `Ctrl+PageDown` / `Ctrl+PageUp` when you'd rather move to the neighbouring tab in the order they appear in the tab strip.
+
+With the tab strip focused (`Alt+Shift+T`), `Enter` activates the focused tab. Press `Space` to pick a tab up, move it with the arrow keys, and press `Space` again to drop it; `Escape` cancels the move.
+
+## View
+
+| Action | Shortcut |
+|---|---|
+| Open Settings | `Ctrl+,` |
+| Open Keyboard Shortcuts | `Ctrl+K` then `Ctrl+B` |
+| Open Command Palette | `Ctrl+Shift+P` |
+| Toggle View Mode (read-only) | `Alt+Shift+V` |
+| Zoom In | `Ctrl+=` |
+| Zoom Out | `Ctrl+-` |
+| Reset Zoom | `Ctrl+0` |
+
+## Layout
+
+| Action | Shortcut |
+|---|---|
+| Toggle Left Sidebar | `Ctrl+B` |
+| Toggle Right Sidebar | `Ctrl+Alt+B` |
+| Toggle Result Panel | `Ctrl+J` |
+| Toggle Audit Log | `Ctrl+Shift+L` |
+| Toggle Focus Mode | `Ctrl+Alt+Z` |
+
+## Connection
+
+| Action | Shortcut |
+|---|---|
+| Open Project Hub | `Ctrl+P` |
+| Switch Environment: Development | `Alt+Shift+D` |
+| Switch Environment: Staging | `Alt+Shift+G` |
+| Switch Environment: Production | `Alt+Shift+P` |
+| Begin Transaction | `Ctrl+Shift+7` |
+| Commit Transaction | `Ctrl+Shift+8` |
+| Rollback Transaction | `Ctrl+Shift+9` |
+
+## App
+
+| Action | Shortcut |
+|---|---|
+| Lock App | `Ctrl+L` |
+| Reload Application | `Ctrl+Shift+R` |
+
+## Keyboard-Only Navigation
+
+You can reach every main area of the app without the mouse. These shortcuts move keyboard focus to a specific area:
+
+| Action | Shortcut |
+|---|---|
+| Focus Editor | `Ctrl+I` |
+| Focus Editor Toolbar | `Ctrl+K` then `Ctrl+T` |
+| Focus Result Grid | `Ctrl+Shift+G` |
+| Focus Tab Strip | `Alt+Shift+T` |
+| Focus Database Explorer (when the SQL editor doesn't have focus) | `Ctrl+Shift+E` |
+| Focus the ERD diagram (with an ERD tab open) | `Ctrl+Shift+M` |
+| Open the context menu for the focused item | `F4` |
+
+`Ctrl+Shift+E` runs **Explain Query** while the SQL editor has focus and moves focus to the explorer everywhere else.
+
+### Explorer
+
+The explorer is a single tab stop, so `Tab` doesn't make you step through every row. Once inside:
+
+- `↑` / `↓` move between rows (and between the categories above the list such as Tables and Views); `Enter` or `Space` selects the focused category.
+- `→` expands a schema and `←` collapses it.
+- `Enter` or `Space` on a schema toggles it; on an object, it opens it, the same as a click.
+
+### Result grid
+
+With the grid focused:
+
+- The arrow keys move the active cell.
+- `Enter` or `F2` on a single selected cell starts editing it, the same as a double-click.
+- `Escape` clears the selection and returns focus to the editor toolbar, so you can jump into the grid with `Ctrl+Shift+G` and back out again. While you're editing a cell, `Enter` and `Escape` belong to the cell editor instead.
+
+### Command palette
+
+Open the [Command Palette](/features/command-palette) with `Ctrl+Shift+P` and type part of an open tab's name: matching tabs appear in an **Open Tabs** group, and `Enter` switches to the tab you've highlighted.
+
+For the ERD diagram's own keys, see [ERD Visualization](/features/erd#keyboard).
+
+## Monaco Editor Defaults
+
+These come from the underlying Monaco editor (the same engine behind VS Code) and work whenever the SQL editor is focused. They're standard editor behavior, not part of Zentro's rebindable shortcut list above.
+
+| Action | Shortcut |
+|---|---|
+| Trigger suggestions | `Ctrl+Space` |
+| Find in editor | `Ctrl+F` |
+| Replace in editor | `Ctrl+H` |
+| Comment / Uncomment line | `Ctrl+/` |
+| Move line up / down | `Alt+↑` / `Alt+↓` |
+| Copy line up / down | `Shift+Alt+↑` / `Shift+Alt+↓` |
+| Select next occurrence | `Ctrl+D` |
+
+## Result Grid
+
+These apply while the result grid has focus and cells are selected.
+
+| Action | Shortcut |
+|---|---|
+| Open Row Detail for the selected cell | `Tab` `Tab` (press twice quickly) |
+| Move the active cell | Arrow keys |
+| Edit the selected cell | `Enter` or `F2` |
+| Clear the selection and return to the editor toolbar | `Escape` |
+| Mark selected rows for deletion | `Delete` |
+| Save pending edits/deletions | `Ctrl+S` |
+| Copy selected cells | `Ctrl+C` |
+| Paste into selected cells | `Ctrl+V` |

@@ -1,0 +1,256 @@
+---
+title: Connecting to a Database
+description: Supported databases and how to configure connections in Zentro.
+---
+
+import { Callout, Tabs } from 'nextra/components'
+
+# Connecting to a Database
+
+Zentro supports PostgreSQL, MySQL, MariaDB, Microsoft SQL Server, and SQLite.
+
+Connections live in one **shared pool**. Each project environment binds to a pooled connection plus the database it should use, so a connection you enter once can back environments across different projects without re-typing it. Exporting or importing connections uses a `{ version, connections: [] }` bundle, and passwords are always stripped from the file.
+
+## Supported Databases
+
+| Database | Notes |
+|---|---|
+| **PostgreSQL** | Full feature support |
+| **MySQL** | Full feature support |
+| **MariaDB** | Uses the MySQL driver |
+| **Microsoft SQL Server** | Username and password login |
+| **SQLite** | File-based; you give the path to the database file — no host, port, or login |
+
+## Connection Fields
+
+The form opens with the connection string field (new connections only), followed by the fields below. Fields a driver doesn't use are disabled or hidden — SQLite, for example, has no host, port, or login.
+
+| Field | Required | Notes |
+|---|---|---|
+| Connection string (URI) | No | Paste a URI to fill in the fields below — see [Connection string](#connection-string-uri). Shown when you create a connection; not shown for SQLite |
+| Connection name | Yes | Must be unique across your connections |
+| Host | Server drivers | With an [SSH tunnel](#ssh-tunnel), this is the database address as seen from the SSH server |
+| Port | Server drivers | Filled with the driver's default when you pick it — see [Default Ports](#default-ports) |
+| Username / Password | Username on server drivers | Not used for SQLite |
+| Bootstrap database | No | Server drivers only. Only used to open the connection when testing it or listing its databases. Which database a project works against is chosen per environment, not here |
+| Database file | Yes (SQLite) | The path to the `.db` file; use the folder button to browse for it |
+
+Under **Advanced** you'll find these options:
+
+| Option | Applies to | What it does |
+|---|---|---|
+| SSL mode | PostgreSQL, MySQL | Disable / Require / Verify CA / Verify Full (default: Disable). See [SSL and TLS](#ssl-and-tls) |
+| TLS minimum version | Server drivers | Driver default, or TLS 1.0 – 1.3 |
+| Legacy TLS ciphers | Server drivers | Also offer older cipher suites, for old servers |
+| Save password | All | Remember the password in the OS keychain. On by default |
+| Encrypt password | All | Encrypt the password when stored on disk. On by default. While **Save password** is on, it must stay on — Zentro won't test or save the connection otherwise |
+| Show all schemas | Server drivers | Show every schema instead of just the default one |
+| Trust server cert | SQL Server | Skip validating the server's TLS certificate |
+| Connect through an SSH tunnel | Server drivers | See [SSH tunnel](#ssh-tunnel) |
+
+## Connection string (URI)
+
+When you create a connection, you can paste a URI into **Connection string (URI)** instead of typing each field. Zentro fills in the form as you type, and you can still edit any field afterwards. The field is hidden for SQLite, which has no connection string, and when you edit an existing connection.
+
+| Database | Example URI |
+|---|---|
+| PostgreSQL | `postgres://user:pass@host:5432/db` |
+| MySQL / MariaDB | `mysql://user:pass@host:3306/db` |
+| SQL Server | `sqlserver://user:pass@host:1433?database=master` |
+
+What Zentro reads from a URI:
+
+- **Driver** — chosen by the scheme. `postgres://` and `postgresql://` mean PostgreSQL, `mysql://` means MySQL / MariaDB (`mariadb://` isn't recognised — use `mysql://`), and `sqlserver://` and `mssql://` mean SQL Server. A URI with any other scheme is ignored. A string with no scheme at all (for example `user:pass@host:5432/db`) is read as the driver you've currently selected.
+- **Host, port, username, and password** — percent-encoded characters in the username or password (such as `%40` for `@`) are decoded. If the URI has no port, Zentro uses the driver's default port.
+- **Database** — for PostgreSQL and MySQL it's the path after the host (`/db`). For SQL Server it's the `database` query parameter; the path of a SQL Server URI is the named instance, so it is not used as the database.
+- **SSL mode** — from `sslmode`, `ssl-mode`, or `tls`, when the value is one Zentro offers: `disable`, `require`, `verify-ca`, `verify-full`, or an equivalent spelling (`disabled`, `required`, `true`, `false`, `skip-verify`, `verify_ca`, `verify_identity`). Other values are ignored.
+- **Trust server cert** — on a SQL Server URI, `trustservercertificate=true` turns it on.
+- **Connection name** — if the name is still empty, it becomes the driver plus the first part of the host name (for example `postgres-db`).
+
+Changing the driver clears the connection string field, since a URI belongs to the driver it was written for.
+
+## Default Ports
+
+<Tabs items={['PostgreSQL', 'MySQL / MariaDB', 'SQL Server', 'SQLite']}>
+  <Tabs.Tab>
+    Default port: **5432**
+
+    Common connection string:
+    ```
+    postgres://username:password@localhost:5432/mydb
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Default port: **3306**
+
+    Common connection string:
+    ```
+    mysql://username:password@localhost:3306/mydb
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Default port: **1433**
+
+    Common connection string:
+    ```
+    sqlserver://username:password@localhost:1433?database=master
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    For SQLite, enter the **absolute path** to the `.db` file in the **Database file** field:
+    ```
+    /Users/you/projects/myapp/local.db
+    ```
+    No host, port, username, or password required.
+  </Tabs.Tab>
+</Tabs>
+
+## SSL and TLS
+
+**SSL mode** controls whether the connection is encrypted and how strictly the server is checked.
+
+| Mode | What it does |
+|---|---|
+| Disable | No encryption (the default) |
+| Require | Encrypt the connection, without verifying the server's certificate |
+| Verify CA / Verify Full | Encrypt and verify the server's certificate |
+
+SSL mode is applied for **PostgreSQL** and **MySQL**. On MySQL, **Verify CA** and **Verify Full** behave the same: both verify the certificate chain against your system's trusted certificate authorities and check the host name. The dropdown also appears for SQL Server, but SQL Server connections ignore it — use **Trust server cert** there instead.
+
+<Callout type="info">
+  For SQL Server, **Trust server cert** skips validating the server's TLS certificate. Turn it on for servers with a self-signed certificate, such as a local development instance.
+</Callout>
+
+Two more options help with older servers:
+
+- **TLS minimum version** — *Driver default*, or TLS 1.0, 1.1, 1.2, or 1.3. On SQL Server, TLS 1.0 is the floor unless you set a higher one, so old servers work without extra setup.
+- **Legacy TLS ciphers** — also offers cipher suites that Zentro no longer enables by default (older RSA key-exchange, 3DES, and CBC-SHA1 suites) which old servers can still require. Turn it on if a connection fails with "TLS handshake failed". It affects TLS 1.2 and below only, and it never turns encryption on by itself — it applies only when the connection already uses TLS.
+
+If a handshake fails, Zentro suggests setting a lower **TLS minimum version** and enabling **Legacy TLS ciphers**; if the server's certificate isn't trusted, it suggests **Trust server cert** or SSL mode **Require**.
+
+## SSH tunnel
+
+If your database is only reachable through a jump host, turn on **Connect through an SSH tunnel** (server drivers; SQLite has no network path). Zentro connects to the SSH server first and opens the database connection through it.
+
+| Field | Notes |
+|---|---|
+| SSH host / SSH port | The SSH server. Port defaults to 22 |
+| SSH user | Required |
+| Authentication | **Password**, **Private key**, or **SSH agent** |
+| SSH password | For Password authentication |
+| Private key file | For Private key authentication — the path to the key file, for example `~/.ssh/id_ed25519` |
+| Key passphrase | Only if the key is encrypted |
+
+<Callout type="info">
+  Once a tunnel is on, the connection's **Host** and **Port** are the database address **as seen from the SSH server** — for example a private host name, or `localhost` on the jump host — not an address your own machine can reach.
+</Callout>
+
+**Authentication methods**
+
+- **Password** — the SSH password. Servers that ask for it through keyboard-interactive prompts get the same password.
+- **Private key** — Zentro reads the key from the file you point to; the key itself is never copied into Zentro's configuration. If the key is encrypted, enter its passphrase.
+- **SSH agent** — uses the keys loaded in your running agent: the OpenSSH agent on Windows, or the agent at `SSH_AUTH_SOCK` on macOS and Linux.
+
+**Host key trust.** The first time you connect to an SSH server, Zentro trusts its host key and records it in its own `ssh_known_hosts` file in Zentro's configuration folder — separate from `~/.ssh/known_hosts`, which Zentro never edits. After that the key is pinned: if the server presents a different key, Zentro refuses to connect and tells you the key has changed, because that can mean someone is intercepting the connection. If the server was legitimately reinstalled, delete that server's line from the `ssh_known_hosts` file and connect again.
+
+**Secrets.** The SSH password and key passphrase are kept in your OS keychain, like the database password, and are remembered only while **Save password** is on. They are never written to Zentro's configuration and are always left out of exported connections.
+
+All connections to the same SSH server, user, and credentials share one SSH connection, which Zentro keeps alive while it's in use and closes after about five minutes with no activity.
+
+## Credential Storage
+
+Passwords are **never stored in plain text**. Zentro uses your operating system's native keychain on all three platforms:
+
+- **Windows**: Windows Credential Manager
+- **macOS**: Keychain
+- **Linux**: Secret Service API
+
+<Callout type="info">
+  If you reset or reinstall Zentro, your connections will need to be re-authenticated since credentials live in the OS keychain, not in Zentro's config files. This includes the SSH password and key passphrase of tunnelled connections.
+</Callout>
+
+## Testing and Saving
+
+The buttons at the bottom of the connection form stay in view while you scroll through the fields:
+
+- **Test** — checks the form, then opens a real connection (through the SSH tunnel, if one is on) and reports **Connection successful!** or the specific error, such as an authentication failure, an unreachable host, or a TLS problem. Testing does not save anything.
+- **Cancel** — closes the form without saving.
+- **Save** — checks the form and saves the connection.
+
+Test and Save run the same checks first and tell you what's missing: a unique connection name; a host, port, and username for server drivers; a database file for SQLite; the SSH host and user (plus the password or key file the chosen authentication method needs) when a tunnel is on; and **Encrypt password** on whenever **Save password** is on.
+
+Click **Test** before saving to catch mistakes early.
+
+## Managing Connections in Settings
+
+Open **Settings → Connections** to manage the shared pool. This is the single place to create, edit, test, and delete connections, and to import or export them. Project environments only *pick* from this pool — they never edit the connection itself.
+
+![Switching environments](/images/getting-started/connection.png)
+
+
+### Toolbar actions
+
+- **New connection** — opens the create form
+- **Refresh** — reloads connections, databases, and project bindings in one go
+- **Import file** — imports connections from a Zentro bundle JSON
+- **Import from tool** — imports saved connections from a supported external tool (for example, DBeaver)
+- **Export** — exports the selected connections to a Zentro bundle JSON
+
+### Connection list
+
+Each connection row shows:
+
+- A **status dot**: green when reachable, pulsing amber while checking, red when unreachable, grey when not checked yet
+- The provider icon, the connection name, and its endpoint (`username@host:port`)
+- A **database** button (host-based drivers only) that expands the database list
+- **Edit** and **Delete** actions
+
+### Database bindings
+
+Expanding a connection shows every database the server exposes in the **Database** column, plus a **Bound by** column listing which project environments bind to each database. A database a project references but that no longer exists on the server is shown in red with a **not on server** label. Each binding appears as a project-coloured pill with an environment badge.
+
+You can also create a new database inline from the **new_database_name** input and **Create** button.
+
+### Editing a connection
+
+Editing a connection updates every project that references it. Zentro shows a warning banner — *Changing credentials here updates every project using this connection* — before you save.
+
+### Deleting a connection
+
+Deleting a connection first tells you how many project environments across how many projects still use it. If any do, those environments will need rebinding before they can connect again.
+
+### Import and export
+
+<Callout type="info">
+  Import and export always strip passwords — a connection bundle never contains secrets, including SSH passwords and key passphrases.
+</Callout>
+
+- **Import file** reads a Zentro `{ version, connections: [] }` bundle. The older single-connection package can still be imported.
+- **Import from tool** lets you pick a tool (when more than one is installed), select the saved connections to pull in, and confirm. Passwords are not imported.
+- **Export** lets you select which connections to write out; the backend always strips secrets.
+
+## Troubleshooting
+
+**Connection timed out**
+: Check that the host is reachable and the port is not blocked by a firewall.
+
+**Authentication failed**
+: Verify the username and password. For PostgreSQL, ensure the user has `CONNECT` privilege on the database.
+
+**SSL certificate error**
+: Set SSL mode to **Disable** for local development, or **Verify CA** / **Verify Full** with the right certificate for production connections. On SQL Server, turn on **Trust server cert** for a self-signed certificate.
+
+**TLS handshake failed**
+: The server may only support an older TLS version or older ciphers. Under **Advanced**, set a lower **TLS minimum version** and turn on **Legacy TLS ciphers**.
+
+**SQL Server login failed**
+: Ensure SQL Server is configured to allow SQL Server Authentication (not Windows-only).
+
+**SSH tunnel: authentication failed**
+: Check the SSH user and the credential for the chosen method — the password, the private key and its passphrase, or that your SSH agent holds a key the server accepts.
+
+**SSH tunnel: could not connect to the database**
+: The SSH server was reached but couldn't open the database address. Check **Host** and **Port** *as seen from the SSH server*, not from your own machine.
+
+**SSH host key has changed**
+: Zentro pinned this server's host key the first time you connected and refuses a different one. If the server was reinstalled, delete its line from Zentro's `ssh_known_hosts` file and connect again; otherwise treat it as a possible interception.

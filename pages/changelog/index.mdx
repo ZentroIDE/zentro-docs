@@ -1,0 +1,177 @@
+---
+title: Release Notes
+description: What's new in each version of Zentro.
+---
+
+import DynamicReleaseNotes from '../../content/changelog-release-notes.generated.mdx'
+
+# Release Notes
+
+{/* Current releases are authored in the Zentro app repo (release-notes/v*.md).
+    content/changelog-release-notes.generated.mdx is rebuilt from that data by
+    scripts/generate-release-notes-mdx.mjs on every `npm run build`/`dev` — as a
+    literal .mdx import, its headings are picked up by Nextra's TOC like any other
+    static section (a runtime-rendered React component's headings are invisible to
+    Nextra's compile-time TOC parser, which is why the sidebar used to lag behind).
+    Versions v0.5.2 and older predate that pipeline and stay as static Markdown below. */}
+
+<DynamicReleaseNotes />
+
+---
+
+## v0.5.2 — August 23, 2026
+
+**Highlights**: Silent auto-update on Windows, a separate Nightly channel, tabs pinned to their own environment
+
+### New Features
+
+- **Silent auto-update (Windows)** — Zentro checks for updates, downloads, and verifies them in the background; a "Restart to apply" prompt shows up once it's ready, no manual download needed. macOS and Linux still link to the latest release page.
+- **Nightly builds** — a separate, side-by-side install for trying unreleased features early, with its own settings and an update flow that always asks before downloading
+- **Pinned environment on Table/Catalog tabs** — each tab now remembers which environment it was opened from, shown as a badge on the tab and in the Ctrl+Tab switcher, so switching projects can't silently move a tab onto the wrong connection
+- **Manual refresh for License status** — a Refresh button in Settings > License to re-check your entitlement on demand
+
+### Fixes & Polish
+
+- Backend license and update checks now point at the dedicated `api.zentro-ide.com` subdomain
+- Fixed an environment-switch flicker caused by auto-reconnect racing an in-flight switch
+- Table breadcrumb navigation now switches to the tab's own pinned connection instead of the active one
+- Smoother tab drag-and-drop and split-view animations; the active tab now reliably scrolls into view
+
+---
+
+## v0.5.1 — August 18, 2026
+
+### Fixes
+
+- Automatically-created schema snapshots (taken before a migration) now correctly show up as rollback targets
+
+---
+
+## v0.5.0 — August 13, 2026
+
+**Highlights**: Image preview in the result grid, refreshed brand identity, simplified environment model
+
+### New Features
+
+- **Image preview in results** — hover over binary or URL cells to preview images inline, with a reworked blob viewer for image payloads
+- **"Mark as Image Column" override** — manually flag columns the auto-detection misses from the column header menu
+- **Simplified environments** — the environment model is now Development, Staging, and Production; existing projects on the removed Local/Testing tiers migrate to Development automatically
+- **Refreshed branding** — new logo and app icon across the app and installer
+- **Plan badge in the toolbar** — your plan now shows as a pill next to the project name
+- **In-app feedback prompt** — a one-time prompt to share how Zentro is working for you
+
+### Fixes & Polish
+
+- FK join suggestions are now collected from every anchor in the statement, not just the first
+- Leading comments are stripped before classifying SELECT statements, so commented queries no longer trigger write-safety incorrectly
+- Backend session reconnects before switching project environment, fixing stale-connection errors after a switch
+- Write confirmations are no longer silently dropped in edge cases
+- Sandbox preview (eye icon) is now correctly gated behind Pro entitlement
+- Fixed stuck dialog nodes wedging Ctrl+Tab and other global shortcuts
+- Update checker now points at the ZentroIDE org repository
+- Patched Go and npm dependency vulnerabilities (Dependabot criticals/highs, transitive dompurify override)
+
+---
+
+## v0.4.0 — July 28, 2026
+
+**Highlights**: Adaptive SQL completion, spotlight-style Context Search, Keys panel rework, per-project instance lock
+
+### New Features
+
+- **Adaptive SQL completion engine** — tables and views are prioritized in suggestions; starter keywords no longer get an unwanted trailing semicolon
+- **Statement run buttons** — a run link above each detected statement via CodeLens, with the active statement highlighted as you move the cursor
+- **Spotlight-style Context Search** (`Ctrl+E`) — unified prefix-based search: schema objects by default, `#` for saved scripts, `>` for commands, `@git`/`@env` for branches/environments, `:` to jump to a line
+- **Project workspace redesign** — two-column create/edit wizard with an icon picker, a DBeaver connection importer, preloaded connections/schemas on project open, per-project instance lock with a distinct project color identity, and "Open in new window"
+- **Inline database creation** — create a new database directly from the database tree picker
+- **Catalog object details viewer** — inline diff view with a confirm-before-discard step for PostgreSQL, MySQL, and SQLite
+- **Keys panel rework** — tab-rail layout with real DDL previews
+- **Query Statistics panel** (Pro) — execution count, P95, and error rate, docked in the bottom panel
+- **Safety awareness moved to Free** — write-safety guardrails and environment strictness are foundational behavior, not a premium gate; Pro adds stricter enforcement (type-to-confirm, cooldown, reason field) on top
+- **Export profile** via a native OS save dialog
+- **Feedback entry point** in the toolbar — reports bugs/requests with app version, build, and OS attached automatically
+
+### Fixes & Polish
+
+- Fixed the editor not regaining focus after running a query from the editor itself (only worked from the toolbar/shortcut before)
+- Fixed the WHERE filter editor losing Ctrl+Z undo history every time the filter re-ran
+- Fixed table data types disappearing from the grid header while View Mode was on
+- Fixed a visual overlap between deleted/draft row states and the index column
+- Fixed transaction row totals being computed incorrectly for multi-statement runs
+- Fixed Space silently swallowing keystrokes instead of inserting a space while SQL suggestions were open
+- Hid internal Zentro housekeeping queries from the audit log and query statistics
+- Redesigned the ORDER BY sort-term popovers — pick ASC/DESC directly instead of a dropdown-plus-Save step
+
+---
+
+## v0.3.0 — April 26, 2026
+
+**Highlights**: Production Safety suite, ERD visualization, PII blur
+
+### New Features
+
+- **Production overlay** — persistent red banner when connected to a Production environment
+- **Write confirmation prompts** — write statements require confirmation on Production; stricter enforcement (type-to-confirm, cooldown, reason field) is Pro-only
+- **Audit log** — every query is logged locally with timestamp and status
+- **Schema snapshots** — automatic DDL snapshots before mutating schema changes; **rollback** to a prior snapshot is Pro-only
+- **App lock** — PIN protection on app open (Pro)
+- **PII blur** — mark columns as PII; values masked in Data Grid by default (Pro)
+- **ERD visualization** — auto-generated Entity-Relationship Diagram from live schema; pan, zoom, filter, export as PNG
+- **Environment indicators** — color-coded toolbar (blue / yellow / red) for Dev / Staging / Production
+
+### Improvements
+
+- Schema Explorer now shows estimated row counts per table
+- Auto-complete now resolves column names after a known table alias
+- Query execution time shown in the result toolbar
+- Improved error messages from database engine (less "unknown error")
+
+### Fixes
+
+- Fixed: switching environments in quick succession could cross-contaminate schema cache
+- Fixed: SQL Server `NVARCHAR(MAX)` columns displayed as empty in Data Grid
+- Fixed: app window position not restored correctly on multi-monitor setups
+
+---
+
+## v0.2.0-beta — March 30, 2026
+
+**Highlights**: Multi-tab editor, Saved Scripts, Query History
+
+### New Features
+
+- **Multi-tab SQL editor** — open multiple query tabs per connection
+- **Saved Scripts** — explicitly save and name frequently-used queries per project
+- **Query History** — automatic per-session history with search
+- **Global search** — search across saved script names and content from Context Search
+- **Copy as** — copy Data Grid selection as CSV, JSON, SQL INSERT, or plain text
+- **Export** — export full result set to CSV or JSON from the grid toolbar
+
+### Improvements
+
+- Connection test now reports specific failure reason (auth failure, host unreachable, SSL, etc.)
+- Data Grid: NULL values now display as a distinct badge instead of blank
+- Timestamps in Data Grid show UTC tooltip on hover
+
+### Fixes
+
+- Fixed: large result sets (1000+ rows) caused scroll lag in Data Grid
+- Fixed: PostgreSQL `TIMESTAMPTZ` columns parsed incorrectly in some locales
+- Fixed: app would occasionally hang on startup if default project was missing
+
+---
+
+## v0.0.1 — March 15, 2026
+
+**First release.** Core functionality.
+
+### Features
+
+- Project-centric workspace (up to 5 projects on Free)
+- Environment management (Dev / Staging / Production) per project
+- SQL editor with syntax highlighting for PostgreSQL, MySQL, SQL Server, SQLite
+- Schema Explorer — browse tables, columns, indexes, foreign keys
+- Data Grid — sortable, filterable, paginated results
+- OS keychain credential storage (Windows Credential Manager)
+- Supported databases: PostgreSQL, MySQL, MariaDB, SQL Server, SQLite
+- Windows x64 (installer + portable builds)

@@ -1,0 +1,46 @@
+---
+title: Command Palette
+description: Run any Zentro command instantly with Ctrl+Shift+P.
+---
+
+# Command Palette
+
+The Command Palette gives you keyboard access to every registered shortcut/action in Zentro without navigating menus.
+
+Under the hood it's the same dialog as [Context Search](/features/script-search) — `Ctrl+Shift+P` just opens it pre-filled with the `>` prefix. You can get to the exact same place with `Ctrl+E` then typing `>` yourself.
+
+## Opening the Palette
+
+Press `Ctrl+Shift+P`. Start typing to filter — every word you type must match somewhere in the command's label, category, or keybinding.
+
+![erd-overview](/images/command-palette/command-palette-overview.png)
+
+
+## Available Commands
+
+Commands are grouped by category. This mirrors [Keyboard Shortcuts](/features/shortcuts) exactly — anything with a shortcut shows up here, with its keybinding displayed on the right.
+
+| Category | Examples |
+|---|---|
+| **Editor** | New Query Tab, Save Current Tab, Run Query, Explain Query, Explain Analyze, Format Query, Toggle Bookmark, Next Bookmark, Open Schema Diff, Open Context Search |
+| **View** | Open Settings, Open Keyboard Shortcuts, Toggle View Mode, Zoom In / Out / Reset |
+| **Layout** | Toggle Left/Right Sidebar, Toggle Result Panel, Toggle Audit Log, Toggle Focus Mode |
+| **Connection** | Open Project Hub, Switch Environment (Development/Staging/Production), Begin/Commit/Rollback Transaction |
+| **App** | Lock App, Reload Application |
+
+## Navigating Results
+
+| Key | Action |
+|---|---|
+| `↑` / `↓` | Move through results |
+| `Enter` | Run the selected command |
+| `Esc` | Close the palette |
+
+## Tips
+
+- You don't need exact wording — typing `env prod` matches "Switch Environment: Production" (every typed word just needs to appear somewhere in the label).
+- Because it's the same dialog as Context Search, you can clear the `>` and switch to any other mode — `#` for scripts, `@env`/`@git` for environments/branches, `:` to jump to a line — without closing and reopening.
+
+![erd-overview](/images/command-palette/command-palette-switch-env-overview.png)
+
+![erd-overview](/images/command-palette/command-palette-git-overview.png)

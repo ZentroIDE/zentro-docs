@@ -1,0 +1,158 @@
+---
+title: Installation
+description: How to download and install Zentro on Windows, macOS, and Linux.
+---
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+# Installation
+
+Zentro is available for **Windows**, **macOS**, and **Linux**.
+
+## System Requirements
+
+| | Windows | macOS | Linux |
+|---|---|---|---|
+| **OS** | Windows 10/11 (64-bit) | macOS 11+ (Big Sur or later) | Ubuntu, Fedora, Debian and compatible |
+| **CPU** | x64 (AMD64) | Apple Silicon or Intel (universal) | x64 (AMD64) |
+| **RAM** | 4 GB | 4 GB | 4 GB |
+| **Disk** | 20 MB free | 20 MB free | 20 MB free |
+
+## Download
+
+Download Zentro from the [download page](https://zentro-ide.com/download) on the website — it detects your platform automatically.
+
+<Tabs items={['Windows', 'macOS', 'Linux']}>
+  <Tabs.Tab>
+    <Tabs items={['Installer (recommended)', 'Portable']}>
+      <Tabs.Tab>
+        Download `zentro-v<version>-windows-amd64-installer.exe` and run it. The installer adds Zentro to your Start Menu and a Desktop shortcut.
+
+        <Steps>
+          ### Run the installer
+          Double-click `zentro-v<version>-windows-amd64-installer.exe`. If Windows SmartScreen appears, click **More info → Run anyway**.
+
+          ### Follow the setup wizard
+          Accept the default install path or choose your own.
+
+          ### Launch Zentro
+          Open Zentro from the Start Menu or Desktop shortcut.
+        </Steps>
+
+        ### Why does Windows SmartScreen show a warning?
+
+        Zentro's installer and executable are digitally signed, but you may still see a blue "Windows protected your PC" screen the first time you run it.
+
+        <video src="/images/smart-screen-warning/smart-screen-warning.mp4" autoPlay loop muted playsInline controls style={{ width: '100%', borderRadius: 8 }} />
+
+        This is expected for a new app and does **not** mean Zentro is unsafe. SmartScreen doesn't just check the signature — it also weighs how many Windows users have already run that exact build, a reputation score that builds up over time as more people download it. A brand-new release starts with little to no reputation, even though it's properly signed, so SmartScreen shows a caution screen until enough people have run it safely.
+
+        <Callout type="info">
+          To continue: click **More info**, then **Run anyway**. This only appears on the first launch of each new version — once your download count contributes to Zentro's reputation, the warning goes away for that build.
+        </Callout>
+      </Tabs.Tab>
+      <Tabs.Tab>
+        **No installation required — run from any folder.**
+
+        Download `zentro-v<version>-windows-amd64.exe` and place it wherever you want. No admin rights required.
+
+        <Callout type="info">
+          The portable build stores its configuration next to the executable. If you want to move Zentro, copy the entire folder.
+        </Callout>
+      </Tabs.Tab>
+    </Tabs>
+  </Tabs.Tab>
+  <Tabs.Tab>
+    <Tabs items={['Installer (recommended)', 'App Bundle']}>
+      <Tabs.Tab>
+        Download `zentro-v<version>-macos-universal.pkg` and run it. It installs Zentro to `/Applications`, works on both Apple Silicon and Intel, and self-updates in place.
+
+        <Steps>
+          ### Run the installer
+          Double-click `zentro-v<version>-macos-universal.pkg`. macOS will block it the first time — see below for how to continue.
+
+          ### Follow the install wizard
+          Zentro installs to `/Applications`.
+
+          ### Launch Zentro
+          Open Zentro from Launchpad or `/Applications`.
+        </Steps>
+
+        ### Why does macOS block the installer?
+
+        Zentro isn't notarized by Apple yet (that requires a paid Apple Developer account), so Gatekeeper blocks the first launch with a message like *"Zentro can't be opened because Apple cannot check it for malicious software."*
+
+        <Callout type="warning">
+          To continue: open **System Settings → Privacy & Security**, scroll down to the security message near the bottom, and click **Open Anyway**. Then try running the installer again and confirm.
+
+          You only need to do this once — after the install completes, Zentro opens normally from then on, including after future updates.
+        </Callout>
+      </Tabs.Tab>
+      <Tabs.Tab>
+        **A plain `.app` you can drag into `/Applications` yourself.**
+
+        Download `zentro-v<version>-macos-universal.zip`, unzip it, and drag `Zentro.app` into `/Applications` (or run it from anywhere).
+
+        <Callout type="warning">
+          Unlike the `.pkg`, this build keeps the quarantine flag macOS adds to downloaded files, so Gatekeeper blocks it every time until you clear it. Either right-click `Zentro.app` → **Open** and confirm once, or run:
+
+          ```bash
+          xattr -cr /path/to/Zentro.app
+          ```
+
+          The `.pkg` installer above doesn't have this problem — it clears the flag automatically after install, so prefer it unless you specifically need a portable `.app`.
+        </Callout>
+      </Tabs.Tab>
+    </Tabs>
+  </Tabs.Tab>
+  <Tabs.Tab>
+    <Tabs items={['AppImage (recommended)', '.deb', '.rpm']}>
+      <Tabs.Tab>
+        **Works on most distros — no install step.**
+
+        Download `zentro-v<version>-linux-amd64.AppImage`, make it executable, and run it:
+
+        ```bash
+        chmod +x zentro-v<version>-linux-amd64.AppImage
+        ./zentro-v<version>-linux-amd64.AppImage
+        ```
+
+        <Callout type="info">
+          Bundles its own GTK3/WebKit2GTK, so it runs on distros that ship a different WebKit version than the one Zentro was built against. Self-updates in place.
+        </Callout>
+      </Tabs.Tab>
+      <Tabs.Tab>
+        **Debian, Ubuntu, and compatible distros.**
+
+        Download `zentro-v<version>-linux-amd64.deb` and install it:
+
+        ```bash
+        sudo dpkg -i zentro-v<version>-linux-amd64.deb
+        ```
+      </Tabs.Tab>
+      <Tabs.Tab>
+        **Fedora and compatible distros.**
+
+        Download `zentro-v<version>-fedora-amd64.rpm` and install it:
+
+        ```bash
+        sudo rpm -i zentro-v<version>-fedora-amd64.rpm
+        ```
+      </Tabs.Tab>
+    </Tabs>
+  </Tabs.Tab>
+</Tabs>
+
+## First Launch
+
+When you open Zentro for the first time:
+
+1. No account or sign-in is required
+2. You land on the **Project Hub** with no projects yet
+3. Create your first project from there
+
+→ Continue to [Your First Project](/getting-started/first-project)
+
+## Updating
+
+Zentro checks for updates automatically shortly after launch (toggleable in Settings) and notifies you when a new version is available — it does not download or install updates automatically. Grab the new build from the [download page](https://zentro-ide.com/download) and install it the same way as above. You can also trigger a check manually from the app menu (**Check for Updates**).

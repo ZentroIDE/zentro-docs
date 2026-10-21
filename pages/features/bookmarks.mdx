@@ -1,0 +1,30 @@
+---
+title: Bookmarks
+description: Bookmark specific lines in your SQL scripts for instant navigation back to them.
+---
+
+# Bookmarks
+
+Bookmarks in Zentro mark a **specific line inside a query tab** — like bookmarks in a code editor — so you can jump straight back to a spot in a long script instead of scrolling to find it.
+
+## Setting a Bookmark
+
+- Press `Ctrl+F3` with your cursor on the line you want to mark.
+- Or right-click the line-number gutter next to that line.
+
+Press `F3` to jump to the next bookmark in the current tab.
+
+## The Bookmarks Panel
+
+Open the **Bookmark** tab in the sidebar. It has two scopes:
+
+- **Current** — bookmarks in the tab you're currently viewing, listed by line number.
+- **Global** — every bookmark across all your open/saved query tabs for the active connection, grouped by tab name (with a count badge and collapsible groups).
+
+Click a bookmark to jump to it. In Global scope, if the tab isn't currently open, Zentro reopens it — recovering the content from the matching saved script by name if one exists — and jumps to the bookmarked line.
+
+Hover a bookmark for a trash icon to remove it. The refresh icon in the panel header reloads the list for the current scope.
+
+## Scope
+
+Bookmarks are scoped to the **connection** they were created against, not the whole project — switching connections shows that connection's own bookmarks.

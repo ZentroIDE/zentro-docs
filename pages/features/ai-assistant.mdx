@@ -1,0 +1,116 @@
+---
+title: AI Assistant
+description: Chat about your database with a model you choose. It sees your schema, not your data, unless you opt in.
+---
+
+import { Callout } from 'nextra/components'
+import { ProCallout } from '@/components/ProCallout'
+
+# AI Assistant
+
+The assistant is a chat in the right-hand sidebar (**Assistant**) that answers questions about your database — which tables reference this one, why a query might be slow, what a change would break. You bring your own model key; Zentro never routes the conversation through its own servers.
+
+<Callout type="info">
+  **The whole assistant is free on every plan** — including Data mode and the extra tools below. Only the extra confirmation steps on production changes ([see below](#approving-a-change)) are Pro.
+</Callout>
+
+## Turn it on
+
+The assistant is **off until you enable it for a project**: open **Settings → Assistant** and turn on **Enable for this project**. SQL it writes opens in a new tab and you run it yourself. To keep one connection out of the chat while the rest of the project stays on, use **Off for this connection**.
+
+### Choose a provider and model
+
+1. In **Settings → Assistant → Model**, pick a provider: **Codex** (OpenAI's API) or **DeepSeek**.
+2. Paste your **API key** and press **Test**. Keys are stored in your OS keyring, never in the project.
+3. Zentro loads the list of models **from the provider itself** and lets you choose one — no model name is hard-coded. You can also switch models from the box under the chat input.
+
+## What the model sees
+
+The rule is one sentence: **the assistant sees your schema, not your data**, unless you turn on Data mode and approve each sample.
+
+| | Data mode off (default) | Data mode on |
+|---|---|---|
+| Table, column, key and comment names | Yes | Yes |
+| View, routine and script text | Only if you allow it | Same |
+| Row values | **Never** | At most 10 rows per tool call, after your approval |
+| Counts (affected rows, table statistics) | Yes | Yes |
+
+<Callout type="warning">
+  Names themselves can be sensitive. Anything you type into the chat is sent, and the provider's own terms (retention, region, training) apply. For a database where even table names are confidential, keep the assistant off for that project.
+</Callout>
+
+### You review what is sent
+
+Before the first message of a chat, Zentro shows what will leave your machine — the schema the model can look up, the provider host, and how many earlier messages are included. Press **View** to read the exact payload, then **Allow** (this chat) or **Allow for project** (skip the review in every chat of this project). A new provider host must be allowed before anything is sent. Later rounds of a reply can be opened from the reply ("Sent to *host*").
+
+If your message contains something shaped like an **email, phone number, card number, JWT, credential or connection string**, Zentro holds the send and asks whether to keep it or let you edit the message.
+
+### What you can switch on
+
+Under **Settings → Assistant → What it can read**, everything beyond structure is off until you allow it:
+
+| Switch | What it adds |
+|---|---|
+| View, routine and script text | The text of views, routines and saved scripts, with literal values replaced |
+| Connection details | Host, port and user name for [MCP agents](/features/mcp-server) — never the password |
+| Count rows | How many rows a change would touch — counts only |
+| Data mode | Up to 10 rows per question |
+| Run history | When queries ran and how long — never the SQL or errors |
+
+### Data mode
+
+Data mode is per project and off by default. When on:
+
+- A tool returns **at most 10 rows**.
+- With a **cloud model**, every round that carries rows stops and shows you the exact rows and the provider host. They are sent only if you approve, and the approval covers that round only. No answer within five minutes counts as no.
+- **Production** rows always ask, and the dialog says they come from Production.
+- Columns whose names look like credentials (password, secret, token, API key, hash) are always returned as `***`, and so is any cell whose text looks like an email, phone, card, token or credential — whatever the column is called.
+- Result rows are **never stored** in saved chats.
+
+<Callout type="info">
+  Zentro blocks *accidental* leaks, not deliberate ones: if you copy a result into the chat, it is sent. Every byte that does leave was shown to you first.
+</Callout>
+
+## Using the chat
+
+- **@-mentions** — type `@` to mention a schema, table or column. `@t:` limits the list to tables, `@s:` to schemas and `@c:` to columns. Mentions are checked against your real schema, so a name that doesn't exist is rejected.
+- **Streaming replies** — answers appear as they are written, and you can stop one midway.
+- **Token bar** — above the input, the total tokens used in this chat as reported by the provider, with a tooltip for input, output and cached tokens.
+- **Questions list** — jump to any question in a long chat, or step through them with **Alt+↑** and **Alt+↓** while focus is in the assistant.
+- **Saved chats** — chats are saved per project (text only — never keys or rows). The history button lists them with search, rename and delete (with confirmation), and an empty chat offers your three latest under **Continue a chat**.
+
+## What it can do for you
+
+The assistant looks things up with tools instead of guessing. The core ones are always available; the rest load on demand to keep requests small.
+
+| Tool | What it does |
+|---|---|
+| `search_schema`, `describe_table`, `list_relations` | Find objects, read columns, keys, indexes and foreign keys |
+| `validate_sql` | Check SQL against the real schema without running it |
+| `explain_plan` | Estimated plan for one statement — not run |
+| `get_table_stats`, `list_indexes` | Size and usage statistics from the catalog; missing, duplicate and unused index hints |
+| `find_dependencies` | What breaks if a table, view, routine or column changes |
+| `diff_schema` | Compare two environments of the same database kind |
+| `check_migration_safety`, `generate_migration` | Locks and breaking changes in DDL; SQL to make one environment match another |
+| `estimate_impact`, `preview_cascade` | Count the rows an `UPDATE`/`DELETE` would touch, or cascade through |
+| `dry_run` | Run a write in a transaction on **dev or staging** and always roll it back |
+
+The lookup and check tools (`validate_sql`, `explain_plan`, `get_table_stats`, `list_indexes`, `find_dependencies`, `dry_run`) have an implementation for PostgreSQL, MySQL, SQL Server and SQLite; a tool a database doesn't support answers with a clear "unsupported driver" error. Depth varies — for SQL Server, `validate_sql` is a token-level check, not a check against the database. `dry_run` is never allowed on production.
+
+## Proposing changes
+
+Turn on **Propose changes** to let the assistant write a change for you to review. It **never runs it** — a proposal waits in the **Changes** sidebar panel.
+
+1. The assistant calls `propose_change` with the SQL and its explanation.
+2. The panel shows the agent's explanation and, separately, what **Zentro measured itself**: statement kinds, risk, impact.
+3. You **Approve** or **Reject** (with an optional note). Nothing executes until you approve.
+
+Proposals expire — after 15 minutes on development, 10 on staging and 5 on production — and at most five can be pending. Any parameter left empty must be filled before approval. In view mode, proposals and dry runs are refused. Before a `CREATE`, `ALTER`, `DROP` or `TRUNCATE` on staging or production, Zentro tries to capture a restore point.
+
+By default the assistant **cannot propose changes for a production connection**. **On Production too** lifts that — you still approve every one.
+
+### Approving a change
+
+<ProCallout feature="Type-to-confirm and cooldown on proposed changes" />
+
+With Pro, approving a production proposal means typing the environment name and waiting out a short cooldown (at least 3 seconds). See [Production Safety](/features/production-safety).

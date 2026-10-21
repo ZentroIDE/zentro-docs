@@ -1,0 +1,123 @@
+---
+title: SQL Editor
+description: The Zentro SQL editor — multi-tab, syntax-aware, keyboard-first.
+---
+
+import { Callout } from 'nextra/components'
+
+# SQL Editor
+
+The SQL editor is the core of Zentro, built on Monaco (the editor behind VS Code). Type a query, run it, see results — all without leaving the keyboard.
+
+## Overview
+
+- Multi-tab editing — open multiple queries per project
+- Syntax highlighting and adaptive autocomplete for PostgreSQL, MySQL, SQL Server, and SQLite
+- A run button (via CodeLens) above each detected statement, with the active statement highlighted as you move the cursor
+- Inline error reporting from the database engine
+- [Syntax checks as you type](#syntax-checks) that need no database connection
+- A [formatter](#formatting) with SQL Server (T-SQL) support and configurable style
+- [Custom syntax colors](#custom-colors) for light and dark themes
+- A status strip with the cursor position and the size of your selection
+- Results rendered in the Data Grid, sortable and filterable
+
+![Switching environments](/images/sql-editor/editor-query.png)
+
+## Running Queries
+
+| Action | Shortcut |
+|---|---|
+| Run | `Ctrl+Enter` |
+| Explain Query | `Ctrl+Shift+E` |
+| Explain Analyze | `Ctrl+Alt+E` |
+| Format Query | `Ctrl+Shift+F` |
+| New editor tab | `Ctrl+T` |
+| Close tab | `Ctrl+W` |
+
+`Ctrl+Enter` runs your current text **selection** if you have one; otherwise it runs the contiguous block of non-blank lines around your cursor — so you can stack several statements in one tab, separated by blank lines, and run each independently by just placing your cursor in it (or clicking its CodeLens **Run** link above it).
+
+If the block you run contains multiple `;`-separated statements, Zentro executes them in order and gives each its own result tab, labeled by what it did (e.g. "SELECT users", "UPDATE orders").
+
+The editor regains focus automatically after a run, whether triggered by the shortcut, the run button, or a CodeLens link.
+
+## Formatting
+
+`Ctrl+Shift+F` formats the query. The formatter understands SQL Server (T-SQL) syntax, including `[bracketed]` identifiers, `N'…'` strings, `@variables`, `#temp` tables, and `GO` batch separators, plus CTEs, subqueries, `APPLY`, `CASE`, `MERGE`, `BEGIN … END`, and `TRY … CATCH` blocks.
+
+Choose the style in **Settings → SQL Formatting**. It applies to every connection, and a preview shows the effect as you change each option.
+
+| Option | Choices |
+|---|---|
+| Keyword case | UPPERCASE, lowercase, or keep as written |
+| Indent size | 2, 4, or 8 spaces (ignored when tabs are on) |
+| Indent with tabs | Use a tab character for each indent level |
+| Comma position | End of line (`a,`) or start of line (`, b`) |
+| AND / OR position | Start of line or end of line |
+
+## Auto-complete
+
+The editor's adaptive completion engine provides context-aware, schema-aware suggestions:
+- **Keywords** — `SELECT`, `FROM`, `WHERE`, `JOIN`, etc., with tables/views prioritized over generic keywords in ranking
+- **Table and view names** — pulled from the active connection's schema
+- **Column names** — available after you type a table name or alias
+- **Functions** — database-specific built-in functions
+- **CTE and subquery columns** — columns of a `WITH` query or a subquery you're selecting from, including an explicit column list such as `WITH x (a, b) AS …`
+- **Select-list aliases** — aliases you defined in the `SELECT` list are suggested in `ORDER BY` and `GROUP BY`
+- **SQL Server variables and temp tables** — `@variables`, `@@system` variables such as `@@ROWCOUNT`, and `#temp` tables
+
+![Switching environments](/images/sql-editor/auto-complete.png)
+
+
+Trigger it manually with `Ctrl+Space`.
+
+<Callout type="info">
+  Schema metadata is fetched when you connect and refreshed automatically when you switch environments. To force a refresh, right-click the schema tree and choose **Refresh**.
+</Callout>
+
+## Syntax Checks
+
+The editor flags common syntax mistakes as you type, without needing a database connection. The affected text is underlined; hover it for the explanation.
+
+- Unclosed or unmatched parentheses
+- Unterminated strings, quoted identifiers, and block comments
+- A trailing comma with nothing after it in the list
+- A repeated keyword
+- Comparing with `NULL` using `=` (it never matches — use `IS NULL` / `IS NOT NULL`)
+- `UPDATE` or `DELETE` without a `WHERE` clause
+
+By default the message is shown in the underline's tooltip. Turn on **Inline Diagnostics** in **Settings → Appearance** to also show each message at the end of its line, like the Error Lens extension.
+
+<Callout type="info">
+  These checks are deliberately conservative: they only flag things that are almost certainly mistakes, so a clean result doesn't guarantee the database will accept the query.
+</Callout>
+
+## Custom Colors
+
+Open **Settings → SQL Editor Colors** to change how each kind of SQL is drawn. Light and dark themes keep **separate** settings: use the **Light themes** / **Dark themes** buttons to pick which one you're editing, and a preview shows the result. Changes apply to open editors immediately.
+
+For each category — keywords, functions, data types, strings, numbers, comments, operators, variables, identifiers, quoted names, parentheses, and delimiters — you can pick a color from a palette, set the font weight (normal, semi-bold, or bold), and turn italics on or off. **Reset** puts one category back to the theme's default; **Reset all** clears every override for that theme.
+
+### Schema-aware coloring
+
+Turn on **Highlight table, column and alias names** (marked experimental) to color names using your schema, in addition to the grammar-based colors above. This adds three more categories you can style: **Table names**, **Column names**, and **Aliases & CTEs**. Table names are resolved from the loaded schema; columns are colored for tables whose columns have already been loaded. The editor scans the script as you type, and the option is off by default.
+
+## Cursor and Selection
+
+A status strip at the bottom of the editor shows the cursor position as `Ln 12, Col 5`. With a selection it adds the number of selected characters (and lines when the selection spans more than one), and with multiple cursors it shows how many there are.
+
+## Saved Scripts
+
+Query tabs autosave as you type (2 seconds after you stop, and every 15 seconds while there are unsaved changes) — you rarely need to save manually. Saved scripts appear in the **Scripts** panel (left sidebar).
+
+→ See [Saved Scripts & History](/features/saved-scripts)
+
+## Result Panel
+
+After a query runs, results appear in the bottom panel:
+
+- **Data Grid** — tabular view, sortable, filterable, editable for simple single-table results
+- **Affected rows** — shown for `INSERT`, `UPDATE`, `DELETE`
+- **Execution time** — displayed per query
+- **Errors** — inline, with the database engine's message
+
+→ See [Data Grid & Table View](/features/data-grid)

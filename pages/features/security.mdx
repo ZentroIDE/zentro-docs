@@ -1,0 +1,74 @@
+---
+title: Security & App Lock
+description: App lock with PIN and PII detection in Zentro Pro.
+---
+
+import { Callout } from 'nextra/components'
+import { ProCallout } from '@/components/ProCallout'
+
+# Security & App Lock
+
+<ProCallout feature="App lock and PII blur" />
+
+## App Lock
+
+App Lock protects your Zentro session with a PIN when you're away from your workstation. After a configurable idle timeout, the app locks automatically and requires the PIN to resume.
+
+### Setting Up App Lock
+
+1. Go to **Settings → Security → App Lock**
+2. Enable App Lock
+3. Set a PIN (any non-empty value — there's no minimum length requirement)
+4. Configure the idle timeout — a preset of 1, 5, 15, or 30 minutes (default: 5 minutes)
+
+![erd-overview](/images/security/security.png)
+
+
+### Locked State
+
+When the app locks, all content is hidden behind a PIN entry screen. Open connections and editor state are preserved — entering the correct PIN resumes exactly where you left off.
+
+![erd-overview](/images/security/app-lock.png)
+
+
+### Windows Fallback After Repeated Failures
+
+After **3** incorrect PIN attempts, the lock screen offers a **"Verify with Windows"** option that unlocks the app using your current Windows account instead of the PIN.
+
+![erd-overview](/images/security/app-lock-with-window-pass.png)
+
+<Callout type="warning">
+  This fallback is **Windows-only** — on macOS and Linux, a forgotten PIN currently has no fallback.
+</Callout>
+
+---
+
+## PII Detection & Column Blur
+
+![erd-overview](/images/security/PII.png)
+
+Zentro scans result columns for personally identifiable information. Detection runs automatically; blurring itself is opt-in — turn on **Blur sensitive columns** in the result panel toolbar to have detected columns rendered with a frosted blur effect in the grid.
+
+### Detected Patterns
+
+| Type | Example |
+|---|---|
+| Email address | `user@example.com` |
+| Phone number | `+1-555-867-5309` |
+| JWT token | `eyJhbGci...` |
+| Credit card number | 13–19 digit sequences (Luhn-validated) |
+
+### How It Works
+
+When a query result loads, Zentro runs pattern detection on the values in each column. Columns where a significant portion of values match a PII pattern are automatically blurred — cell contents get a CSS blur filter applied in the grid (the underlying text isn't masked or replaced, just visually obscured, and can't be selected while blurred).
+
+### Manual Overrides
+
+- **Blur a column**: right-click column header → **Blur column**
+- **Unblur a column**: right-click column header → **Unblur Column**
+- **Toggle all blurred columns**: use the blur icon in the result panel toolbar
+
+<Callout type="info">
+  Blurring is display-only — the underlying data is not affected. Exports and clipboard copies include the real values unless the column is still blurred at export time.
+</Callout>
+

@@ -1,0 +1,37 @@
+---
+title: Query Statistics
+description: Track query execution patterns, latency, and error rates in Zentro Pro.
+---
+
+import { Callout } from 'nextra/components'
+import { ProCallout } from '@/components/ProCallout'
+
+# Query Statistics
+
+<ProCallout feature="Query statistics" />
+
+Query Statistics aggregates execution data across the queries you run, normalized by pattern, so you can spot slow or error-prone statements.
+
+## How It Works
+
+Every query execution is captured in an in-memory ring buffer (up to 5,000 entries; oldest entries drop off as it fills — stats reset when you restart Zentro). Query text is normalized by stripping literal values, so `WHERE id = 1` and `WHERE id = 42` are counted as the same pattern.
+
+## Opening the Panel
+
+Click the **Stats** tab in the bottom panel bar (next to Result / Audit / Realtime / App Log).
+
+## Overview
+
+At the top: total query count, overall error rate, average duration, and P95 duration for whatever's currently loaded.
+
+## Views
+
+- **Top Impact** — patterns ranked by total execution time summed across all their runs.
+- **Most Frequent** — patterns ranked by how many times they've run.
+
+Each row shows the pattern's run count, average duration, its most recent run's duration (flagged if it's more than 2× the average — a regression signal), and how many of its runs errored. There's no separate error-rate ranking view — error counts are a column on both tables instead.
+
+## Filtering
+
+Filter by **connection profile** and **driver**. There's a manual **Refresh** button (with a "last refreshed Xs/Xm ago" indicator) rather than live auto-updating.
+![erd-overview](/images/query-stats/query-stats-overview.png)

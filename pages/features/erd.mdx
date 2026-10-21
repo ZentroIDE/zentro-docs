@@ -1,0 +1,63 @@
+---
+title: ERD Visualization
+description: An interactive, relationship-focused diagram generated from your live database schema.
+---
+
+import { Callout } from 'nextra/components'
+
+# ERD Visualization
+
+Zentro generates an Entity-Relationship Diagram from your live schema — no configuration, no manual drawing.
+
+<Callout type="info">
+  The ERD is scoped to **one table and its relationships**, not the whole database at once. Open a table and expand outward from there rather than expecting a full-schema diagram.
+</Callout>
+
+## Opening the ERD
+
+
+![erd-overview](/images/erd/erd-overview.png)
+
+
+Open a table from Schema Explorer, then switch to its **ERD** tab. Zentro loads that table plus every table it's directly connected to via foreign keys, one level deep.
+
+## What's Shown
+
+Each table renders as a card listing its columns:
+- **PK** badge — primary key columns
+- **FK** badge — foreign key columns
+- Relationship lines connect FK columns to the primary key they reference, with a label on the edge; click an edge to see the underlying constraint details
+
+## Layout
+
+Zentro arranges the tables automatically, left to right: a table that holds a foreign key sits to the left of the table it references, so the relationships read in one direction.
+
+Drag a table card to move it. Your arrangement is **saved** per table diagram (per connection, database, schema, and table) on this computer, so the diagram looks the same the next time you open it. Tables you haven't moved yet are placed automatically.
+
+To go back to the automatic arrangement, click the **Reset layout** button in the controls at the bottom left of the canvas. It discards the saved positions and lays the tables out again.
+
+## Navigation
+
+- **Pan and zoom** with your mouse or trackpad. Zoom ranges from 10% to 200%.
+- The **controls** at the bottom left of the canvas include zoom in, zoom out, and fit-to-screen buttons, plus **Reset layout**.
+- The **minimap** at the bottom right shows the whole diagram with your current view highlighted. Drag inside it to pan and scroll over it to zoom.
+- The canvas has a dotted background.
+
+### Keyboard
+
+Press `Ctrl+Shift+M` to move keyboard focus to the diagram. While the canvas itself has focus:
+
+| Key | Action |
+|---|---|
+| `↑` `↓` `←` `→` | Pan the view |
+| `+` or `=` | Zoom in |
+| `-` or `_` | Zoom out |
+| `0` | Fit the whole diagram on screen |
+
+## Creating a Relationship
+
+Drag from one column's connector handle to another to create a new foreign key between them — Zentro opens a dialog to name the constraint and set `ON DELETE`/`ON UPDATE` behavior before applying it.
+
+## Supported Databases
+
+ERD generation works for any connected database driver that reports foreign key relationships (PostgreSQL, MySQL, SQL Server, SQLite). Databases/tables with no `FOREIGN KEY` constraints defined will show as isolated tables with no edges.

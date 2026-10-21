@@ -1,0 +1,55 @@
+---
+title: Terminal
+description: A shell inside Zentro's bottom panel — on your machine, or on the SSH server of a tunnelled connection.
+---
+
+import { Callout } from 'nextra/components'
+
+# Terminal
+
+Zentro can open a real shell in the bottom panel, next to your results — so you can run a quick command without leaving the app. A terminal is either a **local shell** on your machine or a **shell on the SSH server** of a connection that uses an SSH tunnel.
+
+<Callout type="warning">
+  A terminal runs commands with your user account's full rights. That's why it's **off by default**: the Terminal tab doesn't exist until you switch it on.
+</Callout>
+
+## Turning it on
+
+Open **Settings → Terminal** and enable **Enable terminal**. A **Terminal** tab appears in the bottom panel. Turning the setting off removes the tab and closes every open shell, so none is left running out of sight.
+
+## Opening and closing the panel
+
+Press `` Ctrl+` `` to show the Terminal tab, and again to switch the bottom panel back to your results. You can also click the **Terminal** tab itself. The shortcut only exists while the terminal is enabled.
+
+## Starting a shell
+
+In an empty Terminal tab, choose **New Local Terminal** or one of the **SSH Shell** entries. Once you have a session open, use the **+** button in the tab strip (**New terminal**) to add more.
+
+### Local shell
+
+| OS | Shell | Starts in |
+|---|---|---|
+| Windows | PowerShell, or `cmd` if PowerShell isn't found | Your home folder |
+| macOS / Linux | Your `$SHELL`, or `/bin/sh` if it isn't set | Your home folder |
+
+The tab is named after the shell. On Windows the terminal needs Windows 10 version 1809 or later.
+
+### SSH shell
+
+Every connection that has **Connect through an SSH tunnel** turned on appears as an SSH shell option, labelled with the connection name and `user@host`. Zentro logs in with the SSH host, user, and authentication already set on that connection (password, private key, or SSH agent) — there's nothing separate to configure. Connections without a tunnel aren't listed; turn on **Connect through an SSH tunnel** in the connection's settings to add one.
+
+The tab is named `user@host`.
+
+## Working with tabs
+
+- Each shell is its own tab; click a tab to switch, or the **×** on it to close that shell.
+- Switching to another bottom-panel tab and back keeps every session and its scrollback.
+- The terminal resizes with the panel.
+
+## When a shell exits
+
+A shell that ends (you typed `exit`, or the connection dropped) keeps its scrollback and shows **Shell exited** with its exit code. Choose **Restart** to start the same kind of shell again — for an SSH tab, on the same connection. The old tab is closed only once the new one has started, so a failed restart loses nothing.
+
+## Keyboard
+
+While a terminal has focus, it owns the keyboard: keys like `Ctrl+L`, `Ctrl+P`, `Ctrl+E`, and `Ctrl+W` go to your shell, not to Zentro. The one exception is `` Ctrl+` ``, which always toggles the panel so you can get back out.

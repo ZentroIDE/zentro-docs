@@ -1,0 +1,87 @@
+---
+title: MCP Server
+description: Let Claude Desktop, Claude Code, Cursor or another MCP agent read your database structure through Zentro — locally, behind a token, with every call audited.
+---
+
+import { Callout } from 'nextra/components'
+
+# MCP Server
+
+Zentro can run a local [Model Context Protocol](https://modelcontextprotocol.io) server so an external agent — Claude Desktop, Claude Code, Cursor, or another MCP client — can look up the structure of your database through the same tools as the in-app [AI Assistant](/features/ai-assistant).
+
+<Callout type="info">
+  The MCP server is **free on every plan**. It is off until you start it, and an agent gets **no row values and no way to run a change** — see [What agents can do](#what-agents-can-do).
+</Callout>
+
+## How it stays local
+
+- It listens on **127.0.0.1 only** — by default port `47391` at `/mcp` (if that port is taken, Zentro picks a free one and shows it).
+- Every request needs a **bearer token**, stored in your OS keyring. A request whose `Host` or `Origin` isn't loopback is refused, so a web page can't reach it.
+- Calls are checked at the moment they run against the same rules as the chat: the assistant must be on for the project and the connection.
+- Zentro can't see where an agent sends what it reads. The agent may pass it to its own model, so treat what it reads as sent to a cloud service.
+
+## Connect an agent
+
+Open **Settings → Assistant** and find **External agents (MCP)**:
+
+1. Turn on **MCP server**. It shows the address and how many calls it has served.
+2. Optionally turn on **Start with Zentro** so agents you set up keep working after a restart.
+3. Press the connect button for your agent:
+
+| Agent | What Zentro does |
+|---|---|
+| Claude Desktop | Adds Zentro to its configuration — needs Node.js (Zentro bridges through `npx mcp-remote`); quit and reopen Claude Desktop after a change |
+| Claude Code | Registers Zentro for every folder (needs the `claude` command) |
+| Cursor | Adds Zentro to its configuration; reload MCP in Cursor after a change |
+
+Each row says whether the agent was found on your computer and whether it's already set up. For any other client, choose **Manual setup** to copy the address and token and the sample configuration.
+
+If a token is shared by accident, press **Rotate** next to **Token** — then add each agent again.
+
+If the server runs but calls would be refused (for example, the assistant is off for the project), Settings shows "Calls are refused right now" with the reason.
+
+## What agents can do
+
+An agent sees the same tools as the chat's schema and context tools — for example `search_schema`, `describe_table`, `get_app_context`, `validate_sql`, `explain_plan`, `find_dependencies`, `diff_schema` — **except** `run_readonly_query`, which returns row values and is **never offered to an external agent**. A call to it is refused.
+
+**Nothing is committed through MCP.** `dry_run` runs on development or staging and always rolls back; it is never allowed on production. An agent can call `propose_change`, but that only creates a proposal you must approve in Zentro's **Changes** panel ([how proposals work](/features/ai-assistant#proposing-changes)).
+
+### Permission groups
+
+Each tool belongs to a group, and a group is on or off per project in **Settings → Assistant**:
+
+| Group | Switch | Tools |
+|---|---|---|
+| Structure | Always on with the assistant | Schema lookups |
+| App context | Always on with the assistant | Project, environment, connection and script lists; recent run summaries (`list_audit`), Git status, query statistics |
+| View, routine and script text | **View, routine and script text** | `get_definition` |
+| Reading counts | **Count rows** | `estimate_impact`, `preview_cascade`, `dry_run` |
+| Run history | **Run history** | `get_audit_log` |
+| Changes | **Propose changes** | `propose_change`, `get_change_status`, `cancel_change`, `list_changes`, restore-point tools |
+
+A tool in a group that's off still appears in the agent's tool list, but calling it is refused with `PERMISSION_DENIED` and a hint to turn it on in **Settings → Assistant**.
+
+### Connection details
+
+By default an agent sees a connection's **name, driver, SSL mode and the environments bound to it**, and nothing about where it points. The **Connection details** switch adds the **host, port and user name**. The **password is never returned**, whatever the setting. It's off by default.
+
+### Production
+
+Reads follow the same rules in every environment. **Proposing a write on a production connection** needs the **On Production too** switch. Production rows are never sent to an agent in any case.
+
+## Rate limits
+
+To stop a runaway agent, the server allows **120 tool calls per minute** across all tools, and **10 per minute** for the changes group. The window is fixed: it resets a minute after the first call of the window. A call over the limit is refused with `RATE_LIMITED` and "Wait *N* seconds and try again."
+
+## Audit trail
+
+Every call an agent makes — allowed, denied or rate-limited — is recorded in Zentro's local audit log:
+
+- who called (`mcp:` plus the agent's user agent), which tool, and the outcome (`ok`, `denied`, `error`);
+- for SQL, the **normalized text with literal values replaced** and its SHA-256 hash — never the raw values.
+
+Agent entries are **chained**: each one stores a hash of the entry before it plus its own contents, so an edited, inserted or removed record is detectable. When **Run history** is on, an agent can read the log with `get_audit_log`, which reports whether the chain is still valid (`chainValid`).
+
+## Turning it off
+
+Switch **MCP server** off in **Settings → Assistant**, or turn the assistant off for the project or connection. Agents are refused immediately.

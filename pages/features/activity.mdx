@@ -1,0 +1,79 @@
+---
+title: Activity & Background Jobs
+description: Track, cancel and force-stop running queries, exports and imports, and inspect the database server's own sessions.
+---
+
+import { Callout } from 'nextra/components'
+
+# Activity & Background Jobs
+
+The **Activity panel** is where Zentro shows work that is running in the background — queries, exports and CSV imports — and lets you cancel it. A second tab lists the sessions on the database server itself.
+
+Open it with **Ctrl+Shift+Y** (*Toggle Activity Panel*), or by clicking the running-jobs indicator in the status bar.
+
+## Jobs
+
+Every query you run, every export and every CSV import appears as a row on the **Jobs** tab, newest first. Zentro's own internal queries (such as schema refreshes) are never listed.
+
+| Column | What it shows |
+|---|---|
+| **Job** | A status icon, a kind badge (`QUERY`, `EXPORT`, `IMPORT`), the title, a progress bar while it runs, and a short caption (row counts, a percentage, or the error if it failed) |
+| **Connection** | The connection name and database the job ran against |
+| **Elapsed** | Live while running; hover to see when it started and finished |
+
+A job moves through **Queued → Running → Succeeded / Failed / Cancelled** (with **Cancelling** in between when you stop it). Use the trash button in the tab header to **clear finished jobs**; running jobs are never removed. Zentro keeps up to 200 finished jobs and drops the oldest beyond that.
+
+### Cancel and force kill
+
+- **Cancel** is offered while a job is running and asks for confirmation inline, in the row. The prompt says what you will lose: a query is simply stopped; an export's partial file is discarded; an import may leave rows that were already inserted.
+- **Force kill** appears only after a cancel is already in progress and hasn't taken effect yet. It terminates the job's session on the database server, and any open transaction on it is rolled back. It is available for queries and for exports of all rows, when the database driver supports it — not for imports.
+
+## Exporting results
+
+Choose **Export** in the result panel, then pick CSV, JSON or SQL `INSERT`, and whether to export **In View** (the rows already loaded) or **All (no paging)** (the query is re-run and streamed to the file).
+
+- The save dialog opens first; cancel it and no job is created.
+- Rows are streamed to a temporary `<name>.part` file next to your chosen path. On success it is renamed to the final file; if the export is cancelled or fails, it is deleted.
+- Progress is reported in rows. When it finishes, a notification offers **Open file** and **Show in folder**.
+
+## Importing a CSV
+
+In Schema Explorer, right-click a table and choose **Import/Export Data… → Import…**. The wizard has four steps:
+
+1. **File** — pick the CSV, choose the delimiter (comma, semicolon, tab or pipe) and whether the first row is a header. A preview of the first rows is shown.
+2. **Target** — the schema and table to import into.
+3. **Mapping** — map each CSV column to a table column (Zentro shows an inferred type for each), tick **Skip** to leave a column out, set a **NULL token** and choose whether to trim whitespace.
+4. **Options** — the **batch size** (rows per `INSERT`, default 1000); what to do when a row fails — **abort** (default) or **skip the row and log it** (up to 100 errors); whether to **run in a single transaction** (on by default, so cancelling rolls everything back); and whether to **truncate the table first** (off by default).
+
+Starting the import closes the wizard and runs it as a background job you can follow and cancel from the Activity panel.
+
+<Callout type="warning">
+  Truncating first, and importing without a single transaction, change data you can't get back by cancelling. Leave the single-transaction option on unless you need the rows committed as the import goes.
+</Callout>
+
+## Sessions
+
+The **Sessions** tab lists the sessions open on the database server you're connected to, refreshed automatically while the tab is selected.
+
+| Database | Source |
+|---|---|
+| PostgreSQL | `pg_stat_activity` — client sessions only; background workers such as autovacuum are hidden |
+| MySQL / MariaDB | `information_schema.PROCESSLIST` |
+| SQL Server | `sys.dm_exec_sessions` — user sessions only |
+| SQLite | Not supported — the tab says so |
+
+You see the sessions the database lets your user see. The toolbar has a **filter** — **Active** (default, hides idle sessions), **All**, or **Mine** (sessions Zentro itself is holding) — a **refresh interval** of 5, 10 or 30 seconds, and a manual refresh. Each row shows the PID, user, database, client, state, duration and the query; sessions Zentro holds are marked with ★.
+
+The **⋯** menu on a row offers:
+
+- **Copy query**
+- **Cancel query** — interrupts the current statement; the session stays open.
+- **Kill session** — ends the session; its open transaction is rolled back.
+
+Both actions ask for confirmation, and neither is available on Zentro's own sessions. When the active environment is **Production**, killing a session also requires typing the session ID.
+
+## Status bar and closing the app
+
+While at least one job is running, the status bar shows a spinner, the number of running jobs, the latest job's title and a small progress bar. Click it to open the Activity panel; hover it for a list of every running job with its percentage.
+
+If you close Zentro while a query or a background job is still running, it asks first. **Force Close** stops everything in progress — an export or import is cancelled and its partial file discarded.

@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: Official documentation for Zentro — a project-centric desktop SQL IDE.
+---
+
+import { Cards, Card } from 'nextra/components'
+import { CurrentReleaseVersion } from '@/components/CurrentRelease'
+
+# Welcome to Zentro
+
+Zentro is a high-performance desktop SQL IDE built around the concept of **projects** — one workspace per service, one context per environment. Instead of juggling a list of raw connections, you organize your databases the way your team does: by project, by environment (Development, Staging, Production), with safety guardrails that match each one.
+
+## Why Zentro?
+
+Most SQL clients show you a flat list of connections. Zentro is structured around how you actually work:
+
+- **Projects** — one workspace per service (e.g. `auth-service`, `analytics-db`)
+- **Environments** — each project has three environment slots (Development, Staging, Production), each visually distinct
+- **Connections** — a shared pool of database connections; each environment slot binds to one, so you enter a connection once and reuse it across projects
+- **Production safety** — before writing to production, the app slows you down on purpose
+- **Local-first** — everything runs on your machine; credentials stay in your OS keychain
+
+## Supported Databases
+
+| Database | Status |
+|---|---|
+| PostgreSQL | ✅ Supported |
+| MySQL / MariaDB | ✅ Supported |
+| Microsoft SQL Server | ✅ Supported |
+| SQLite | ✅ Supported |
+| More | Coming soon |
+
+## Quick Start
+
+<Cards>
+  <Card title="Installation" href="/getting-started/installation" arrow>
+    Download and install Zentro on your machine.
+  </Card>
+  <Card title="Your First Project" href="/getting-started/first-project" arrow>
+    Create a project and set up your first database connection.
+  </Card>
+  <Card title="Try Pro free for 30 days" href="/pro/license" arrow>
+    Unlock every Pro feature — no credit card. Free stays free when the trial ends.
+  </Card>
+</Cards>
+
+## Current Release
+
+The latest stable release is <CurrentReleaseVersion />, available for **Windows**, **macOS**, and **Linux**.
+
+Download it from [zentro-ide.com/download](https://zentro-ide.com/download) — it detects your platform automatically.
