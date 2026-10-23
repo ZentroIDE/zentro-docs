@@ -29,7 +29,7 @@ const config: DocsThemeConfig = {
       <span>
         Zentro is under active development — some pages here may be incomplete or out of date.{' '}
         <a
-          href="https://github.com/ZentroIDE/zentro-window-issue-tracker/issues"
+          href="https://github.com/ZentroIDE/Zentro/issues"
           target="_blank"
           rel="noopener noreferrer"
           style={{ textDecoration: 'underline' }}

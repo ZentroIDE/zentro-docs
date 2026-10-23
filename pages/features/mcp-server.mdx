@@ -53,10 +53,10 @@ Each tool belongs to a group, and a group is on or off per project in **Settings
 | Group | Switch | Tools |
 |---|---|---|
 | Structure | Always on with the assistant | Schema lookups |
-| App context | Always on with the assistant | Project, environment, connection and script lists; recent run summaries (`list_audit`), Git status, query statistics |
+| App context | Always on with the assistant | Project, environment, connection and script lists; Git status, query statistics |
 | View, routine and script text | **View, routine and script text** | `get_definition` |
 | Reading counts | **Count rows** | `estimate_impact`, `preview_cascade`, `dry_run` |
-| Run history | **Run history** | `get_audit_log` |
+| Run history | **Run history** | `get_audit_log`, `list_audit` |
 | Changes | **Propose changes** | `propose_change`, `get_change_status`, `cancel_change`, `list_changes`, restore-point tools |
 
 A tool in a group that's off still appears in the agent's tool list, but calling it is refused with `PERMISSION_DENIED` and a hint to turn it on in **Settings → Assistant**.

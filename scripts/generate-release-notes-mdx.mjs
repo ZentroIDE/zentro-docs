@@ -18,7 +18,7 @@ const ROOT = join(__dirname, '..')
 
 const SOURCE_URL =
   process.env.NEXT_PUBLIC_RELEASE_NOTES_URL ||
-  'https://raw.githubusercontent.com/ZentroIDE/zentro-releases/main/release-notes/index.json'
+  'https://raw.githubusercontent.com/ZentroIDE/Zentro/main/release-notes/index.json'
 
 // Deliberately outside pages/ — anything under pages/ becomes its own routable
 // page in Next.js, and we only want this imported as a partial, not served at
